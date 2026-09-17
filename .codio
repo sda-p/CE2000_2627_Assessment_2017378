@@ -1,0 +1,9 @@
+{
+  "commands": {
+    "Install Dependencies": "npm install",
+    "Start Server": "npm start"
+  },
+  "preview": {
+    "App Preview": "https://{{domain}}:9500/"
+  }
+}
