@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  res.send('quotes page');
+  const page = parseInt(req.query.page) || 1;
+  res.render('quotes', { title: 'Quotes', page: page });
 });
 
 module.exports = router;
