@@ -19,4 +19,23 @@ router.get('/quotes/random', async (req, res) => {
   res.json(quotes);
 });
 
+// group quotes by shared tags (first attempt at similarity)
+router.get('/quotes/grouped', async (req, res) => {
+  const quotes = await fetchQuotes(20);
+
+  // group by first tag
+  const groups = {};
+  quotes.forEach(function(q) {
+    if (q.tags && q.tags.length > 0) {
+      const tag = q.tags[0].toLowerCase();
+      if (!groups[tag]) {
+        groups[tag] = { tag: tag, quotes: [] };
+      }
+      groups[tag].quotes.push(q);
+    }
+  });
+
+  res.json(Object.values(groups));
+});
+
 module.exports = router;

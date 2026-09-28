@@ -6,4 +6,8 @@ router.get('/', (req, res) => {
   res.render('quotes', { title: 'Quotes', page: page });
 });
 
+router.get('/grouped', (req, res) => {
+  res.render('grouped', { title: 'Grouped Quotes' });
+});
+
 module.exports = router;
