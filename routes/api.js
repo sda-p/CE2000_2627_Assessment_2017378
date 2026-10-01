@@ -19,23 +19,71 @@ router.get('/quotes/random', async (req, res) => {
   res.json(quotes);
 });
 
-// group quotes by shared tags (first attempt at similarity)
+// naive word stemming - strip common suffixes
+function stemWord(word) {
+  word = word.toLowerCase().replace(/[^a-z]/g, '');
+  if (word.length < 4) return word;
+
+  // strip common suffixes
+  if (word.endsWith('ing')) return word.slice(0, -3);
+  if (word.endsWith('ed')) return word.slice(0, -2);
+  if (word.endsWith('ly')) return word.slice(0, -2);
+  if (word.endsWith('es')) return word.slice(0, -2);
+  if (word.endsWith('s')) return word.slice(0, -1);
+
+  return word;
+}
+
+function getWordStems(text) {
+  const words = text.split(/\s+/);
+  const stems = {};
+  words.forEach(function(w) {
+    const stem = stemWord(w);
+    if (stem.length > 0) {
+      stems[stem] = (stems[stem] || 0) + 1;
+    }
+  });
+  return stems;
+}
+
+// group quotes by word stem overlap
 router.get('/quotes/grouped', async (req, res) => {
   const quotes = await fetchQuotes(20);
 
-  // group by first tag
-  const groups = {};
-  quotes.forEach(function(q) {
-    if (q.tags && q.tags.length > 0) {
-      const tag = q.tags[0].toLowerCase();
-      if (!groups[tag]) {
-        groups[tag] = { tag: tag, quotes: [] };
-      }
-      groups[tag].quotes.push(q);
-    }
+  // build stem frequency for each quote
+  const quoteStems = quotes.map(function(q) {
+    return getWordStems(q.text);
   });
 
-  res.json(Object.values(groups));
+  // group quotes that share stems
+  const groups = [];
+  const used = new Set();
+
+  quotes.forEach(function(q, i) {
+    if (used.has(i)) return;
+
+    const group = { quotes: [q], stems: quoteStems[i] };
+    used.add(i);
+
+    // find similar quotes to add to group
+    quotes.forEach(function(q2, j) {
+      if (used.has(j) || i === j) return;
+
+      let shared = 0;
+      Object.keys(quoteStems[j]).forEach(function(stem) {
+        if (group.stems[stem]) shared++;
+      });
+
+      if (shared >= 3) {
+        group.quotes.push(q2);
+        used.add(j);
+      }
+    });
+
+    groups.push(group);
+  });
+
+  res.json(groups);
 });
 
 module.exports = router;
