@@ -34,56 +34,14 @@ function stemWord(word) {
   return word;
 }
 
-function getWordStems(text) {
-  const words = text.split(/\s+/);
-  const stems = {};
-  words.forEach(function(w) {
-    const stem = stemWord(w);
-    if (stem.length > 0) {
-      stems[stem] = (stems[stem] || 0) + 1;
-    }
-  });
-  return stems;
-}
-
 // group quotes by word stem overlap
+// this was producing garbage results - grouping unrelated quotes together
+// because common words like "the" and "and" dominate the stem frequency
 router.get('/quotes/grouped', async (req, res) => {
   const quotes = await fetchQuotes(20);
 
-  // build stem frequency for each quote
-  const quoteStems = quotes.map(function(q) {
-    return getWordStems(q.text);
-  });
-
-  // group quotes that share stems
-  const groups = [];
-  const used = new Set();
-
-  quotes.forEach(function(q, i) {
-    if (used.has(i)) return;
-
-    const group = { quotes: [q], stems: quoteStems[i] };
-    used.add(i);
-
-    // find similar quotes to add to group
-    quotes.forEach(function(q2, j) {
-      if (used.has(j) || i === j) return;
-
-      let shared = 0;
-      Object.keys(quoteStems[j]).forEach(function(stem) {
-        if (group.stems[stem]) shared++;
-      });
-
-      if (shared >= 3) {
-        group.quotes.push(q2);
-        used.add(j);
-      }
-    });
-
-    groups.push(group);
-  });
-
-  res.json(groups);
+  // just return them ungrouped for now while i figure this out
+  res.json([ { quotes: quotes } ]);
 });
 
 module.exports = router;
