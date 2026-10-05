@@ -19,29 +19,45 @@ router.get('/quotes/random', async (req, res) => {
   res.json(quotes);
 });
 
-// naive word stemming - strip common suffixes
-function stemWord(word) {
-  word = word.toLowerCase().replace(/[^a-z]/g, '');
-  if (word.length < 4) return word;
-
-  // strip common suffixes
-  if (word.endsWith('ing')) return word.slice(0, -3);
-  if (word.endsWith('ed')) return word.slice(0, -2);
-  if (word.endsWith('ly')) return word.slice(0, -2);
-  if (word.endsWith('es')) return word.slice(0, -2);
-  if (word.endsWith('s')) return word.slice(0, -1);
-
-  return word;
+// give up on fancy nlp stuff, just count shared words
+function sharedWords(text1, text2) {
+  const words1 = new Set(text1.toLowerCase().split(/\s+/));
+  const words2 = text2.toLowerCase().split(/\s+/);
+  let count = 0;
+  words2.forEach(function(w) {
+    if (words1.has(w)) count++;
+  });
+  return count;
 }
 
-// group quotes by word stem overlap
-// this was producing garbage results - grouping unrelated quotes together
-// because common words like "the" and "and" dominate the stem frequency
+// group quotes that share at least N words
 router.get('/quotes/grouped', async (req, res) => {
-  const quotes = await fetchQuotes(20);
+  const quotes = await fetchQuotes(15);
+  const threshold = 2;
 
-  // just return them ungrouped for now while i figure this out
-  res.json([ { quotes: quotes } ]);
+  const groups = [];
+  const used = new Set();
+
+  quotes.forEach(function(q, i) {
+    if (used.has(i)) return;
+
+    const group = { quotes: [q] };
+    used.add(i);
+
+    quotes.forEach(function(q2, j) {
+      if (used.has(j) || i === j) return;
+      if (sharedWords(q.text, q2.text) >= threshold) {
+        group.quotes.push(q2);
+        used.add(j);
+      }
+    });
+
+    if (group.quotes.length > 1) {
+      groups.push(group);
+    }
+  });
+
+  res.json(groups);
 });
 
 module.exports = router;
