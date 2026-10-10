@@ -7,9 +7,9 @@ async function loadGroupedQuotes() {
     const groups = await res.json();
 
     let html = '';
-    groups.forEach(function(group) {
-      html += '<div class="mb-4">';
-      html += '<h5 class="text-primary">#' + group.tag + '</h5>';
+    groups.forEach(function(group, idx) {
+      html += '<div class="mb-4 p-3" style="background: #e9ecef; border-radius: 8px;">';
+      html += '<h5 class="text-primary mb-3">Group ' + (idx + 1) + ' (' + group.quotes.length + ' quotes)</h5>';
       group.quotes.forEach(function(q) {
         html += '<div class="quote-card">';
         html += '<p class="quote-text">"' + q.text + '"</p>';
