@@ -5,10 +5,13 @@ const router = express.Router();
 async function fetchQuotes(limit) {
   try {
     const response = await fetch('https://api.quotable.io/quotes/random?limit=' + limit);
+    if (!response.ok) {
+      throw new Error('api returned ' + response.status);
+    }
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error('api error:', err);
+    console.error('api error:', err.message);
     return [];
   }
 }
