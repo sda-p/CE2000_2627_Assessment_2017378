@@ -1,7 +1,21 @@
 const express = require('express');
 const router = express.Router();
 
-// fetch quotes from quotable api
+// some test quotes for when the api is down
+const testQuotes = [
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs", tags: ["work"] },
+  { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill", tags: ["success"] },
+  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt", tags: ["dreams"] },
+  { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius", tags: ["perseverance"] },
+  { text: "Life is what happens when you're busy making other plans.", author: "John Lennon", tags: ["life"] },
+  { text: "The best way to predict the future is to create it.", author: "Peter Drucker", tags: ["future"] },
+  { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein", tags: ["opportunity"] },
+  { text: "The only impossible journey is the one you never begin.", author: "Tony Robbins", tags: ["journey"] },
+  { text: "Everything you've ever wanted is on the other side of fear.", author: "George Addair", tags: ["fear"] },
+  { text: "The purpose of our lives is to be happy.", author: "Dalai Lama", tags: ["happiness"] }
+];
+
+// fetch quotes from quotable api, fall back to test data
 async function fetchQuotes(limit) {
   try {
     const response = await fetch('https://api.quotable.io/quotes/random?limit=' + limit);
@@ -12,7 +26,9 @@ async function fetchQuotes(limit) {
     return data;
   } catch (err) {
     console.error('api error:', err.message);
-    return [];
+    // fall back to test data
+    const shuffled = testQuotes.slice(0, limit);
+    return shuffled;
   }
 }
 
