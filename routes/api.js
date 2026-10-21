@@ -12,7 +12,17 @@ const testQuotes = [
   { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein", tags: ["opportunity"] },
   { text: "The only impossible journey is the one you never begin.", author: "Tony Robbins", tags: ["journey"] },
   { text: "Everything you've ever wanted is on the other side of fear.", author: "George Addair", tags: ["fear"] },
-  { text: "The purpose of our lives is to be happy.", author: "Dalai Lama", tags: ["happiness"] }
+  { text: "The purpose of our lives is to be happy.", author: "Dalai Lama", tags: ["happiness"] },
+  { text: "Knowledge is power.", author: "Francis Bacon", tags: ["knowledge"] },
+  { text: "The unexamined life is not worth living.", author: "Socrates", tags: ["philosophy"] },
+  { text: "To be or not to be, that is the question.", author: "William Shakespeare", tags: ["literature"] },
+  { text: "I think therefore I am.", author: "René Descartes", tags: ["philosophy"] },
+  { text: "The only constant in life is change.", author: "Heraclitus", tags: ["change"] },
+  { text: "Man is condemned to be free.", author: "Jean-Paul Sartre", tags: ["philosophy"] },
+  { text: "What is not spoken about cannot be thought about.", author: "Ludwig Wittgenstein", tags: ["philosophy"] },
+  { text: "He who has a why to live can bear almost any how.", author: "Friedrich Nietzsche", tags: ["meaning"] },
+  { text: "The mind is everything. What you think you become.", author: "Buddha", tags: ["mind"] },
+  { text: "You must be the change you wish to see in the world.", author: "Mahatma Gandhi", tags: ["change"] }
 ];
 
 // fetch quotes from quotable api, fall back to test data
@@ -51,8 +61,8 @@ function sharedWords(text1, text2) {
 
 // group quotes that share at least N words
 router.get('/quotes/grouped', async (req, res) => {
-  const quotes = await fetchQuotes(15);
-  const threshold = 2;
+  const quotes = await fetchQuotes(20);
+  const threshold = 3;
 
   const groups = [];
   const used = new Set();
