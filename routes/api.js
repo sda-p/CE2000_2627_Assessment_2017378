@@ -25,20 +25,16 @@ const testQuotes = [
   { text: "You must be the change you wish to see in the world.", author: "Mahatma Gandhi", tags: ["change"] }
 ];
 
-// fetch quotes from zenquotes api, fall back to test data
+// fetch quotes from type.fit api, fall back to test data
 async function fetchQuotes(limit) {
   try {
-    const response = await fetch('https://zenquotes.io/api/quotes');
+    const response = await fetch('https://type.fit/api/quotes');
     if (!response.ok) {
       throw new Error('api returned ' + response.status);
     }
     const data = await response.json();
-    // zenquotes returns {q, a, c, h} - normalize to {text, author, tags}
-    const normalized = data.map(function(item) {
-      return { text: item.q, author: item.a, tags: [] };
-    });
     // return random subset
-    const shuffled = normalized.sort(function() { return Math.random() - 0.5; });
+    const shuffled = data.sort(function() { return Math.random() - 0.5; });
     return shuffled.slice(0, limit);
   } catch (err) {
     console.error('api error:', err.message);
