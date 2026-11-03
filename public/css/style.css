@@ -4,7 +4,15 @@ body {
 }
 
 .hero-section {
+  background-image: url('/images/thinker-bg.jpg');
+  background-size: cover;
+  background-position: center;
   border-bottom: 3px solid #0d6efd;
+}
+
+.hero-section h1,
+.hero-section p {
+  text-shadow: 0 0 8px #000, 0 0 16px #000, 0 0 24px #000;
 }
 
 .quote-card {
