@@ -63,7 +63,18 @@ function sharedWords(text1, text2) {
 
 // group quotes that share at least N words
 router.get('/quotes/grouped', async (req, res) => {
-  const quotes = await fetchQuotes(20);
+  // fetch multiple batches to get more quotes
+  const batch1 = await fetchQuotes(5);
+  const batch2 = await fetchQuotes(5);
+  const batch3 = await fetchQuotes(5);
+  const allQuotes = [...batch1, ...batch2, ...batch3];
+  // deduplicate by text
+  const seen = new Set();
+  const quotes = allQuotes.filter(function(q) {
+    if (seen.has(q.text)) return false;
+    seen.add(q.text);
+    return true;
+  });
   const threshold = 3;
 
   const groups = [];

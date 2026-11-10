@@ -69,3 +69,10 @@ footer {
   font-weight: bold;
   margin-bottom: 0.75rem;
 }
+
+.load-more-float {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+}
