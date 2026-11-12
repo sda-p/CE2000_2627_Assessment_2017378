@@ -1,29 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
-// some test quotes for when the api is down
-const testQuotes = [
-  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs", tags: ["work"] },
-  { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill", tags: ["success"] },
-  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt", tags: ["dreams"] },
-  { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius", tags: ["perseverance"] },
-  { text: "Life is what happens when you're busy making other plans.", author: "John Lennon", tags: ["life"] },
-  { text: "The best way to predict the future is to create it.", author: "Peter Drucker", tags: ["future"] },
-  { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein", tags: ["opportunity"] },
-  { text: "The only impossible journey is the one you never begin.", author: "Tony Robbins", tags: ["journey"] },
-  { text: "Everything you've ever wanted is on the other side of fear.", author: "George Addair", tags: ["fear"] },
-  { text: "The purpose of our lives is to be happy.", author: "Dalai Lama", tags: ["happiness"] },
-  { text: "Knowledge is power.", author: "Francis Bacon", tags: ["knowledge"] },
-  { text: "The unexamined life is not worth living.", author: "Socrates", tags: ["philosophy"] },
-  { text: "To be or not to be, that is the question.", author: "William Shakespeare", tags: ["literature"] },
-  { text: "I think therefore I am.", author: "René Descartes", tags: ["philosophy"] },
-  { text: "The only constant in life is change.", author: "Heraclitus", tags: ["change"] },
-  { text: "Man is condemned to be free.", author: "Jean-Paul Sartre", tags: ["philosophy"] },
-  { text: "What is not spoken about cannot be thought about.", author: "Ludwig Wittgenstein", tags: ["philosophy"] },
-  { text: "He who has a why to live can bear almost any how.", author: "Friedrich Nietzsche", tags: ["meaning"] },
-  { text: "The mind is everything. What you think you become.", author: "Buddha", tags: ["mind"] },
-  { text: "You must be the change you wish to see in the world.", author: "Mahatma Gandhi", tags: ["change"] }
-];
+// local quote bank for when the api is down or for demo purposes
+const fs = require('fs');
+const path = require('path');
+const quotesFile = path.join(__dirname, '..', 'public', 'data', 'quotes.json');
+const testQuotes = JSON.parse(fs.readFileSync(quotesFile, 'utf8'));
 
 // fetch quotes from type.fit api, fall back to test data
 async function fetchQuotes(limit) {
@@ -62,19 +44,9 @@ function sharedWords(text1, text2) {
 }
 
 // group quotes that share at least N words
+// uses local quote bank for demo purposes (api only has 5 quotes)
 router.get('/quotes/grouped', async (req, res) => {
-  // fetch multiple batches to get more quotes
-  const batch1 = await fetchQuotes(5);
-  const batch2 = await fetchQuotes(5);
-  const batch3 = await fetchQuotes(5);
-  const allQuotes = [...batch1, ...batch2, ...batch3];
-  // deduplicate by text
-  const seen = new Set();
-  const quotes = allQuotes.filter(function(q) {
-    if (seen.has(q.text)) return false;
-    seen.add(q.text);
-    return true;
-  });
+  const quotes = testQuotes;
   const threshold = 3;
 
   const groups = [];
