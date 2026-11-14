@@ -32,6 +32,11 @@ router.get('/quotes/random', async (req, res) => {
   res.json(quotes);
 });
 
+// serve local quote bank (for quotes page load-more)
+router.get('/quotes/local', (req, res) => {
+  res.json(testQuotes);
+});
+
 // give up on fancy nlp stuff, just count shared words
 function sharedWords(text1, text2) {
   const words1 = new Set(text1.toLowerCase().split(/\s+/));

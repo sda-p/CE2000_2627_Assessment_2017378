@@ -1,4 +1,13 @@
 let loaded = 0;
+let localQuotes = null;
+
+async function getLocalQuotes() {
+  if (!localQuotes) {
+    const res = await fetch('/api/quotes/local');
+    localQuotes = await res.json();
+  }
+  return localQuotes;
+}
 
 async function loadQuotes(append) {
   const content = document.getElementById('content');
@@ -9,11 +18,11 @@ async function loadQuotes(append) {
   }
 
   try {
-    const res = await fetch('/api/quotes/random?limit=10');
-    const quotes = await res.json();
+    const quotes = await getLocalQuotes();
+    const batch = quotes.slice(loaded, loaded + 10);
 
     let html = '';
-    quotes.forEach(function(q) {
+    batch.forEach(function(q) {
       html += '<div class="quote-card">';
       html += '<p class="quote-text">"' + q.text + '"</p>';
       html += '<p class="quote-author">- ' + q.author + '</p>';
@@ -21,12 +30,11 @@ async function loadQuotes(append) {
     });
 
     if (append) {
-      // remove the "loading more" message and append new quotes
       content.innerHTML = content.innerHTML.replace('<p class="text-muted">loading more...</p>', html);
     } else {
       content.innerHTML = html;
     }
-    loaded += quotes.length;
+    loaded += batch.length;
   } catch (err) {
     content.innerHTML = '<p class="text-danger">error loading quotes</p>';
   }
