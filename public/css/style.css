@@ -76,3 +76,16 @@ footer {
   right: 2rem;
   z-index: 1000;
 }
+
+.quote-card.new-quote {
+  border-left-color: #fd7e14;
+  position: relative;
+}
+
+.arrow-slot {
+  position: absolute;
+  left: -24px;
+  top: 12px;
+  width: 16px;
+  height: 16px;
+}

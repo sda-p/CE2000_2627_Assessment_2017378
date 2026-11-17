@@ -1,5 +1,6 @@
 let loaded = 0;
 let localQuotes = null;
+let newCardTimers = [];
 
 async function getLocalQuotes() {
   if (!localQuotes) {
@@ -7,6 +8,32 @@ async function getLocalQuotes() {
     localQuotes = await res.json();
   }
   return localQuotes;
+}
+
+// create a little svg arrow
+function makeArrow() {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('width', '16');
+  svg.setAttribute('height', '16');
+  svg.setAttribute('viewBox', '0 0 16 16');
+  svg.classList.add('new-quote-arrow');
+
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', 'M4 4l8 4-8 4V4z');
+  path.setAttribute('fill', '#fd7e14');
+  svg.appendChild(path);
+
+  return svg;
+}
+
+// toggle arrow visibility in a loop
+function startArrowBlinking(arrow) {
+  let visible = true;
+  const timer = setInterval(function() {
+    visible = !visible;
+    arrow.style.display = visible ? 'block' : 'none';
+  }, 1000);
+  newCardTimers.push(timer);
 }
 
 async function loadQuotes(append) {
@@ -19,11 +46,15 @@ async function loadQuotes(append) {
 
   try {
     const quotes = await getLocalQuotes();
-    const batch = quotes.slice(loaded, loaded + 10);
+    const batch = quotes.slice(loaded, loaded + 5);
 
     let html = '';
     batch.forEach(function(q) {
-      html += '<div class="quote-card">';
+      const cardClass = append ? 'quote-card new-quote' : 'quote-card';
+      html += '<div class="' + cardClass + '">';
+      if (append) {
+        html += '<span class="arrow-slot"></span>';
+      }
       html += '<p class="quote-text">"' + q.text + '"</p>';
       html += '<p class="quote-author">- ' + q.author + '</p>';
       html += '</div>';
@@ -34,6 +65,17 @@ async function loadQuotes(append) {
     } else {
       content.innerHTML = html;
     }
+
+    // add blinking arrows to new cards
+    if (append) {
+      const arrowSlots = content.querySelectorAll('.arrow-slot');
+      arrowSlots.forEach(function(slot) {
+        const arrow = makeArrow();
+        slot.appendChild(arrow);
+        startArrowBlinking(arrow);
+      });
+    }
+
     loaded += batch.length;
   } catch (err) {
     content.innerHTML = '<p class="text-danger">error loading quotes</p>';
