@@ -41,7 +41,7 @@ async function loadQuotes(append) {
   if (!append) {
     content.innerHTML = '<p class="text-muted">loading...</p>';
   } else {
-    content.innerHTML += '<p class="text-muted">loading more...</p>';
+    content.innerHTML = '<p class="text-muted">loading more...</p>' + content.innerHTML;
   }
 
   try {
@@ -60,11 +60,7 @@ async function loadQuotes(append) {
       html += '</div>';
     });
 
-    if (append) {
-      content.innerHTML = content.innerHTML.replace('<p class="text-muted">loading more...</p>', html);
-    } else {
-      content.innerHTML = html;
-    }
+    content.innerHTML = content.innerHTML.replace('<p class="text-muted">loading more...</p>', html);
 
     // add blinking arrows to new cards
     if (append) {
@@ -77,6 +73,9 @@ async function loadQuotes(append) {
     }
 
     loaded += batch.length;
+
+    // scroll to top so new quotes are visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err) {
     content.innerHTML = '<p class="text-danger">error loading quotes</p>';
   }
