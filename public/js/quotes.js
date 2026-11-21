@@ -1,16 +1,29 @@
-let loaded = 0;
-let localQuotes = null;
-let newCardTimers = [];
+// quotes page - loads from local bank and handles the load more button
+let loaded = 0; // how many quotes we've shown so far
+let localQuotes = null; // cached copy of the full quote list
+let newCardTimers = []; // keep track of the arrow blink timers
 
-async function getLocalQuotes() {
-  if (!localQuotes) {
-    const res = await fetch('/api/quotes/local');
-    localQuotes = await res.json();
-  }
-  return localQuotes;
+// fetch the local quotes once and cache them
+function getLocalQuotes() {
+  return new Promise(function(resolve, reject) {
+    if (localQuotes) {
+      resolve(localQuotes);
+    } else {
+      $.ajax({
+        url: '/api/quotes/local',
+        success: function(data) {
+          localQuotes = data;
+          resolve(data);
+        },
+        error: function() {
+          reject('failed to load quotes');
+        }
+      });
+    }
+  });
 }
 
-// create a little svg arrow
+// create a little svg arrow to show which quotes are new
 function makeArrow() {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('width', '16');
@@ -26,7 +39,7 @@ function makeArrow() {
   return svg;
 }
 
-// toggle arrow visibility in a loop
+// toggle arrow visibility in a loop (using js instead of css animation because the brief asked for dom manipulation)
 function startArrowBlinking(arrow) {
   let visible = true;
   const timer = setInterval(function() {
@@ -37,11 +50,11 @@ function startArrowBlinking(arrow) {
 }
 
 async function loadQuotes(append) {
-  const content = document.getElementById('content');
+  const $content = $('#content');
   if (!append) {
-    content.innerHTML = '<p class="text-muted">loading...</p>';
+    $content.html('<p class="text-muted loading-more">loading...</p>');
   } else {
-    content.innerHTML = '<p class="text-muted">loading more...</p>' + content.innerHTML;
+    $content.prepend('<p class="text-muted loading-more">loading more...</p>');
   }
 
   try {
@@ -60,28 +73,28 @@ async function loadQuotes(append) {
       html += '</div>';
     });
 
-    content.innerHTML = content.innerHTML.replace('<p class="text-muted">loading more...</p>', html);
+    $('.loading-more').replaceWith(html);
 
     // add blinking arrows to new cards
     if (append) {
-      const arrowSlots = content.querySelectorAll('.arrow-slot');
-      arrowSlots.forEach(function(slot) {
+      $('.arrow-slot').each(function() {
+        const slot = $(this);
         const arrow = makeArrow();
-        slot.appendChild(arrow);
+        slot.append(arrow);
         startArrowBlinking(arrow);
       });
     }
 
     loaded += batch.length;
 
-    // scroll to top so new quotes are visible
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // scroll back to top so the new quotes are visible
+    $('html, body').animate({ scrollTop: 0 }, 400);
   } catch (err) {
-    content.innerHTML = '<p class="text-danger">error loading quotes</p>';
+    $content.html('<p class="text-danger">error loading quotes</p>');
   }
 }
 
-document.getElementById('load-more').addEventListener('click', function() {
+$('#load-more').on('click', function() {
   loadQuotes(true);
 });
 
