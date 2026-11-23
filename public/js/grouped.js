@@ -1,3 +1,7 @@
+// grouped page - shows quotes grouped by "semantic similarity"
+// (which is really just shared word overlap, not actual nlp)
+
+// load the grouped quotes from the api and render them
 async function loadGroupedQuotes() {
   const content = document.getElementById('content');
   content.innerHTML = '<p class="text-muted">loading and grouping quotes...</p>';
@@ -25,4 +29,5 @@ async function loadGroupedQuotes() {
   }
 }
 
+// load the groups when the page loads
 loadGroupedQuotes();
