@@ -91,9 +91,21 @@ footer {
 }
 
 .info-icon {
-  font-size: 0.8em;
-  color: rgba(255,255,255,0.7);
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  font-size: 0.9em;
+  color: rgba(255,255,255,0.9);
   cursor: help;
   margin-left: 8px;
-  vertical-align: top;
+  margin-top: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.4);
+  text-align: center;
+  line-height: 18px;
+  transition: background-color 0.2s;
+}
+
+.info-icon:hover {
+  background-color: rgba(255,255,255,0.15);
 }
