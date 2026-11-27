@@ -2,6 +2,7 @@
 let loaded = 0; // how many quotes we've shown so far
 let totalQuotes = null; // will be set from the api response
 let newCardTimers = []; // keep track of the arrow blink timers
+let storedQuotes = []; // quotes from the shared store
 
 // escape html entities to prevent injection from api data
 function esc(str) {
@@ -102,8 +103,54 @@ function showAuthorModal(author) {
     });
 }
 
+// render a batch of quotes to the content area
+function renderQuotes(quotes, append) {
+  const $content = $('#content');
+  
+  let html = '';
+  quotes.forEach(function(q) {
+    const cardClass = append ? 'quote-card new-quote' : 'quote-card';
+    html += '<div class="' + cardClass + '">';
+    if (append) {
+      html += '<span class="arrow-slot"></span>';
+    }
+    html += '<p class="quote-text">"' + esc(q.text) + '"</p>';
+    html += '<p class="quote-author">- <span class="author-link" data-author="' + esc(q.author) + '">' + esc(q.author) + '</span></p>';
+    html += '</div>';
+  });
+
+  const $newCards = $(html);
+  if (!append) {
+    $content.html($newCards);
+  } else {
+    $content.prepend($newCards);
+  }
+  
+  // add blinking arrows to new cards only
+  if (append) {
+    $newCards.find('.arrow-slot').each(function() {
+      const slot = $(this);
+      const arrow = makeArrow();
+      slot.append(arrow);
+      startArrowBlinking(arrow);
+    });
+  }
+}
+
 async function loadQuotes(append) {
   const $content = $('#content');
+  
+  // if this is the first load and we have stored quotes, show those first
+  if (!append && storedQuotes.length > 0 && loaded === 0) {
+    renderQuotes(storedQuotes.slice(0, 5), false);
+    loaded = Math.min(5, storedQuotes.length);
+    
+    if (storedQuotes.length <= loaded) {
+      $('#load-more').text('No more stored quotes').prop('disabled', true);
+    }
+    return;
+  }
+  
   if (!append) {
     $content.html('<p class="text-muted loading-more">loading...</p>');
   } else {
@@ -120,39 +167,10 @@ async function loadQuotes(append) {
       totalQuotes = data.total;
     }
 
-    let html = '';
     // save quotes to the shared store
     QuoteStore.saveQuotes(data.quotes);
-
-    data.quotes.forEach(function(q) {
-      const cardClass = append ? 'quote-card new-quote' : 'quote-card';
-      html += '<div class="' + cardClass + '">';
-      if (append) {
-        html += '<span class="arrow-slot"></span>';
-      }
-      html += '<p class="quote-text">"' + esc(q.text) + '"</p>';
-      html += '<p class="quote-author">- <span class="author-link" data-author="' + esc(q.author) + '">' + esc(q.author) + '</span></p>';
-      html += '</div>';
-    });
-
-    // only mark the new batch as new (clear old new state first)
-    if (append) {
-      clearNewState();
-    }
     
-    const $newCards = $(html);
-    $('.loading-more').replaceWith($newCards);
-
-    // add blinking arrows to new cards only
-    if (append) {
-      $newCards.find('.arrow-slot').each(function() {
-        const slot = $(this);
-        const arrow = makeArrow();
-        slot.append(arrow);
-        startArrowBlinking(arrow);
-      });
-    }
-
+    renderQuotes(data.quotes, append);
     loaded += data.quotes.length;
 
     // if we've loaded all quotes, disable the button
@@ -172,6 +190,9 @@ $('#content').on('click', '.author-link', function() {
   const author = $(this).data('author');
   showAuthorModal(author);
 });
+
+// load stored quotes on page load
+storedQuotes = QuoteStore.getQuotes();
 
 $('#load-more').on('click', function() {
   loadQuotes(true);
