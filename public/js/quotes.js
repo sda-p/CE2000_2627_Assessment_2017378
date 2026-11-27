@@ -144,10 +144,6 @@ async function loadQuotes(append) {
   if (!append && storedQuotes.length > 0 && loaded === 0) {
     renderQuotes(storedQuotes.slice(0, 5), false);
     loaded = Math.min(5, storedQuotes.length);
-    
-    if (storedQuotes.length <= loaded) {
-      $('#load-more').text('No more stored quotes').prop('disabled', true);
-    }
     return;
   }
   
