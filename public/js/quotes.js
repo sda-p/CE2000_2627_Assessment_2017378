@@ -40,7 +40,7 @@ async function loadQuotes(append) {
   try {
     // figure out which page we want based on how many we've loaded
     const page = Math.floor(loaded / 5) + 1;
-    const res = await fetch('/api/quotes/page?offset=' + loaded);
+    const res = await fetch('/api/quotes/page?page=' + page);
     const data = await res.json();
 
     if (totalQuotes === null) {
