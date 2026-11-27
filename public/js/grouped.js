@@ -101,7 +101,7 @@ function renderGroups(quotes) {
 
   groups.forEach(function(group, idx) {
     html += '<div class="group-container">';
-    html += '<h5 class="group-title">Group ' + (idx + 1) + ' (' + group.quotes.length + ' quotes)</h5>';
+    html += '<h3 class="group-title">Group ' + (idx + 1) + ' (' + group.quotes.length + ' quotes)</h3>';
     group.quotes.forEach(function(q) {
       html += '<div class="quote-card">';
       html += '<p class="quote-text">"' + esc(q.text) + '"</p>';
