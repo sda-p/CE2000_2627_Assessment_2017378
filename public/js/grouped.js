@@ -3,24 +3,15 @@
 
 // show author info in a modal
 function showAuthorModal(author) {
-  const modalBody = document.getElementById('authorModalBody');
-  modalBody.innerHTML = '<p class="text-muted">loading...</p>';
+  $('#authorModalBody').html('<p class="text-muted">loading...</p>');
   
-  const modal = new bootstrap.Modal(document.getElementById('authorModal'));
+  const modal = new bootstrap.Modal($('#authorModal')[0]);
   modal.show();
   
   // fetch from our backend which proxies to wikipedia
-  fetch('/api/wiki/summary/' + encodeURIComponent(author))
-    .then(function(res) {
-      if (res.status === 404) {
-        modalBody.innerHTML = '<p class="text-muted">no wikipedia page found for ' + author + '</p>';
-        return null;
-      }
-      return res.json();
-    })
-    .then(function(data) {
-      if (!data) return;
-      
+  $.ajax({
+    url: '/api/wiki/summary/' + encodeURIComponent(author),
+    success: function(data) {
       let html = '';
       
       // show disambiguation notice if needed
@@ -49,50 +40,47 @@ function showAuthorModal(author) {
       }
       
       // set modal title
-      document.getElementById('authorModalLabel').textContent = data.title;
+      $('#authorModalLabel').text(data.title);
       
-      modalBody.innerHTML = html;
-    })
-    .catch(function(err) {
-      modalBody.innerHTML = '<p class="text-danger">error loading author info</p>';
-    });
+      $('#authorModalBody').html(html);
+    },
+    error: function() {
+      $('#authorModalBody').html('<p class="text-danger">error loading author info</p>');
+    }
+  });
 }
 
 // load the grouped quotes from the api and render them
-async function loadGroupedQuotes() {
-  const content = document.getElementById('content');
-  content.innerHTML = '<p class="text-muted">loading and grouping quotes...</p>';
+function loadGroupedQuotes() {
+  $('#content').html('<p class="text-muted">loading and grouping quotes...</p>');
 
-  try {
-    const res = await fetch('/api/quotes/grouped');
-    const groups = await res.json();
-
-    let html = '';
-    groups.forEach(function(group, idx) {
-      html += '<div class="group-container">';
-      html += '<h5 class="group-title">Group ' + (idx + 1) + ' (' + group.quotes.length + ' quotes)</h5>';
-      group.quotes.forEach(function(q) {
-        html += '<div class="quote-card">';
-        html += '<p class="quote-text">"' + q.text + '"</p>';
-        html += '<p class="quote-author">- <span class="author-link" data-author="' + q.author + '">' + q.author + '</span></p>';
+  $.ajax({
+    url: '/api/quotes/grouped',
+    success: function(groups) {
+      let html = '';
+      groups.forEach(function(group, idx) {
+        html += '<div class="group-container">';
+        html += '<h5 class="group-title">Group ' + (idx + 1) + ' (' + group.quotes.length + ' quotes)</h5>';
+        group.quotes.forEach(function(q) {
+          html += '<div class="quote-card">';
+          html += '<p class="quote-text">"' + q.text + '"</p>';
+          html += '<p class="quote-author">- <span class="author-link" data-author="' + q.author + '">' + q.author + '</span></p>';
+          html += '</div>';
+        });
         html += '</div>';
       });
-      html += '</div>';
-    });
-
-    content.innerHTML = html;
-  } catch (err) {
-    content.innerHTML = '<p class="text-danger">error loading quotes</p>';
-  }
+      $('#content').html(html);
+    },
+    error: function() {
+      $('#content').html('<p class="text-danger">error loading quotes</p>');
+    }
+  });
 }
 
 // use event delegation because the cards are added dynamically
-document.getElementById('content').addEventListener('click', function(e) {
-  const target = e.target.closest('.author-link');
-  if (target) {
-    const author = target.dataset.author;
-    showAuthorModal(author);
-  }
+$('#content').on('click', '.author-link', function() {
+  const author = $(this).data('author');
+  showAuthorModal(author);
 });
 
 // load the groups when the page loads
