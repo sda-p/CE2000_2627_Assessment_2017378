@@ -71,17 +71,8 @@ function sharedWords(text1, text2) {
   return count;
 }
 
-// load stored quotes and group them
-function loadGroupedQuotes() {
-  $('#content').html('<p class="text-muted">loading and grouping quotes...</p>');
-
-  const quotes = QuoteStore.getQuotes();
-
-  if (quotes.length === 0) {
-    $('#content').html('<p class="text-muted">no quotes stored yet - visit the home or quotes page first to load some quotes</p>');
-    return;
-  }
-
+// render groups from a list of quotes
+function renderGroups(quotes) {
   const threshold = 3;
   const groups = [];
   const used = new Set();
@@ -125,6 +116,31 @@ function loadGroupedQuotes() {
   }
 
   $('#content').html(html);
+}
+
+// load stored quotes and group them
+// if store is empty, fetch some quotes first so the page isn't blank
+function loadGroupedQuotes() {
+  $('#content').html('<p class="text-muted">loading and grouping quotes...</p>');
+
+  const quotes = QuoteStore.getQuotes();
+
+  if (quotes.length === 0) {
+    // fetch some quotes to group
+    $.ajax({
+      url: '/api/quotes/random?limit=15',
+      success: function(newQuotes) {
+        // save to store for next time
+        QuoteStore.saveQuotes(newQuotes);
+        renderGroups(newQuotes);
+      },
+      error: function() {
+        $('#content').html('<p class="text-danger">error loading quotes</p>');
+      }
+    });
+  } else {
+    renderGroups(quotes);
+  }
 }
 
 // use event delegation because the cards are added dynamically
