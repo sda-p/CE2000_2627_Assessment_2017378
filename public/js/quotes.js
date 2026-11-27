@@ -1,27 +1,7 @@
-// quotes page - loads from local bank and handles the load more button
+// quotes page - loads from dummyjson api with pagination
 let loaded = 0; // how many quotes we've shown so far
-let localQuotes = null; // cached copy of the full quote list
+let totalQuotes = null; // will be set from the api response
 let newCardTimers = []; // keep track of the arrow blink timers
-
-// fetch the local quotes once and cache them
-function getLocalQuotes() {
-  return new Promise(function(resolve, reject) {
-    if (localQuotes) {
-      resolve(localQuotes);
-    } else {
-      $.ajax({
-        url: '/api/quotes/local',
-        success: function(data) {
-          localQuotes = data;
-          resolve(data);
-        },
-        error: function() {
-          reject('failed to load quotes');
-        }
-      });
-    }
-  });
-}
 
 // create a little svg arrow to show which quotes are new
 function makeArrow() {
@@ -58,11 +38,17 @@ async function loadQuotes(append) {
   }
 
   try {
-    const quotes = await getLocalQuotes();
-    const batch = quotes.slice(loaded, loaded + 5);
+    // figure out which page we want based on how many we've loaded
+    const page = Math.floor(loaded / 5) + 1;
+    const res = await fetch('/api/quotes/page?offset=' + loaded);
+    const data = await res.json();
+
+    if (totalQuotes === null) {
+      totalQuotes = data.total;
+    }
 
     let html = '';
-    batch.forEach(function(q) {
+    data.quotes.forEach(function(q) {
       const cardClass = append ? 'quote-card new-quote' : 'quote-card';
       html += '<div class="' + cardClass + '">';
       if (append) {
@@ -85,7 +71,12 @@ async function loadQuotes(append) {
       });
     }
 
-    loaded += batch.length;
+    loaded += data.quotes.length;
+
+    // if we've loaded all quotes, disable the button
+    if (loaded >= totalQuotes) {
+      $('#load-more').text('No more quotes').prop('disabled', true);
+    }
 
     // scroll back to top so the new quotes are visible
     $('html, body').animate({ scrollTop: 0 }, 400);

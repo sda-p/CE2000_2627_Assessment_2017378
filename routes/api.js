@@ -37,6 +37,29 @@ router.get('/quotes/local', (req, res) => {
   res.json(testQuotes);
 });
 
+// paginated quotes from dummyjson api
+// using this instead of the local file so the page actually uses an api
+router.get('/quotes/page', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
+    
+    const response = await fetch('https://dummyjson.com/quotes?limit=' + limit + '&skip=' + skip);
+    const data = await response.json();
+    
+    // dummyjson uses 'quote' not 'text', normalize it
+    const normalized = data.quotes.map(function(q) {
+      return { text: q.quote, author: q.author };
+    });
+    
+    res.json({ quotes: normalized, total: data.total, page: page });
+  } catch (err) {
+    console.error('dummyjson error:', err.message);
+    res.status(500).json({ error: 'failed to load quotes' });
+  }
+});
+
 // give up on fancy nlp stuff, just count shared words
 function sharedWords(text1, text2) {
   const words1 = new Set(text1.toLowerCase().split(/\s+/));
