@@ -54,11 +54,15 @@ Built for academic purposes.
 ## Generative AI use
 
 Tool name: Claude
+
 Tool URL: https://claude.ai/
+
 Summary of use: API discovery and format investigation
+
 Date and the prompts you entered:
 - What are some open access test APIs (no API key) I could use for a university project? I'm building an app that actually does something, so the APIs need to do more than just return success or such. [Date: 2026-09-23]
 - What endpoints do they have and what do they expect? [Date: 2026-09-23]
 - Those two quote APIs are kinda limited (one looks to be dead and the other always returns the same 5 quotes), are there any others I could use? Also include endpoints. [Date: 2026-11-27]
 - Are there any other APIs I could use to add secondary functionality? I wrote a quote browser that sort of maybe kinda groups quotes by semantic similarity. [Date: 2026-11-27]
+
 How you used the output: Discovery of candidate project APIs and their endpoint usage.
