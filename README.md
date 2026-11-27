@@ -50,3 +50,7 @@ The original plan was to use the Quotable API (api.quotable.io), but this servic
 ## License
 
 Built for academic purposes.
+
+## Generative AI use
+
+I used Claude to find leads for open APIs I could use, and to get descriptions of their endpoints. Part of that also contributed to the project's idea, but I came up with the concept myself as a way to make an interesting use of quote APIs. All of the code is written manually.
