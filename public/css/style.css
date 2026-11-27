@@ -118,3 +118,22 @@ footer {
 .info-icon:hover {
   background-color: rgba(255,255,255,0.15);
 }
+
+/* mobile fixes - the floating button and arrows were getting in the way */
+@media (max-width: 480px) {
+  .load-more-float {
+    bottom: 1rem;
+    right: 50%;
+    transform: translateX(50%);
+  }
+  
+  .arrow-slot {
+    left: auto;
+    right: -8px;
+    top: 4px;
+  }
+  
+  .quote-card {
+    padding: 1rem;
+  }
+}

@@ -29,6 +29,17 @@ function startArrowBlinking(arrow) {
   newCardTimers.push(timer);
 }
 
+// clear all the old arrow timers and reset the "new" state
+function clearNewState() {
+  // stop all the blink timers
+  newCardTimers.forEach(function(t) { clearInterval(t); });
+  newCardTimers = [];
+  
+  // remove the new-quote class and arrows from all cards
+  $('.quote-card').removeClass('new-quote');
+  $('.arrow-slot').remove();
+}
+
 // show author info in a modal
 function showAuthorModal(author) {
   const modalBody = document.getElementById('authorModalBody');
@@ -116,11 +127,17 @@ async function loadQuotes(append) {
       html += '</div>';
     });
 
-    $('.loading-more').replaceWith(html);
-
-    // add blinking arrows to new cards
+    // only mark the new batch as new (clear old new state first)
     if (append) {
-      $('.arrow-slot').each(function() {
+      clearNewState();
+    }
+    
+    const $newCards = $(html);
+    $('.loading-more').replaceWith($newCards);
+
+    // add blinking arrows to new cards only
+    if (append) {
+      $newCards.find('.arrow-slot').each(function() {
         const slot = $(this);
         const arrow = makeArrow();
         slot.append(arrow);
