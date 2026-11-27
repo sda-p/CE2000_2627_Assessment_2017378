@@ -8,9 +8,15 @@ const quotesFile = path.join(__dirname, '..', 'public', 'data', 'quotes.json');
 const testQuotes = JSON.parse(fs.readFileSync(quotesFile, 'utf8'));
 
 // fetch quotes from type.fit api, fall back to test data
+// adds a timeout so the page doesn't hang forever if the api is slow
 async function fetchQuotes(limit) {
   try {
-    const response = await fetch('https://type.fit/api/quotes');
+    const controller = new AbortController();
+    const timeout = setTimeout(function() { controller.abort(); }, 5000);
+    
+    const response = await fetch('https://type.fit/api/quotes', { signal: controller.signal });
+    clearTimeout(timeout);
+    
     if (!response.ok) {
       throw new Error('api returned ' + response.status);
     }
@@ -45,7 +51,12 @@ router.get('/quotes/page', async (req, res) => {
     const limit = 5;
     const skip = (page - 1) * limit;
     
-    const response = await fetch('https://dummyjson.com/quotes?limit=' + limit + '&skip=' + skip);
+    const controller = new AbortController();
+    const timeout = setTimeout(function() { controller.abort(); }, 5000);
+    
+    const response = await fetch('https://dummyjson.com/quotes?limit=' + limit + '&skip=' + skip, { signal: controller.signal });
+    clearTimeout(timeout);
+    
     const data = await response.json();
     
     // dummyjson uses 'quote' not 'text', normalize it
@@ -110,11 +121,16 @@ router.get('/wiki/summary/:author', async (req, res) => {
     const author = req.params.author.replace(/\s+/g, '_');
     const url = 'https://en.wikipedia.org/api/rest_v1/page/summary/' + author;
     
+    const controller = new AbortController();
+    const timeout = setTimeout(function() { controller.abort(); }, 5000);
+    
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'quote-cluster-ce2000/1.0 (student project) https://localhost:9500'
-      }
+      },
+      signal: controller.signal
     });
+    clearTimeout(timeout);
     
     if (response.status === 404) {
       res.status(404).json({ error: 'no wikipedia page found for ' + author });
