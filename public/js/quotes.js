@@ -121,6 +121,9 @@ async function loadQuotes(append) {
     }
 
     let html = '';
+    // save quotes to the shared store
+    QuoteStore.saveQuotes(data.quotes);
+
     data.quotes.forEach(function(q) {
       const cardClass = append ? 'quote-card new-quote' : 'quote-card';
       html += '<div class="' + cardClass + '">';

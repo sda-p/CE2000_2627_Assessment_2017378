@@ -70,6 +70,9 @@ function loadQuotes() {
   $.ajax({
     url: '/api/quotes/random?limit=5',
     success: function(quotes) {
+      // save quotes to the shared store
+      QuoteStore.saveQuotes(quotes);
+
       let html = '';
       quotes.forEach(function(q, i) {
         // cycle through the colors

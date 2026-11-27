@@ -60,31 +60,71 @@ function showAuthorModal(author) {
   });
 }
 
-// load the grouped quotes from the api and render them
+// group quotes that share at least N words
+function sharedWords(text1, text2) {
+  const words1 = new Set(text1.toLowerCase().split(/\s+/));
+  const words2 = text2.toLowerCase().split(/\s+/);
+  let count = 0;
+  words2.forEach(function(w) {
+    if (words1.has(w)) count++;
+  });
+  return count;
+}
+
+// load stored quotes and group them
 function loadGroupedQuotes() {
   $('#content').html('<p class="text-muted">loading and grouping quotes...</p>');
 
-  $.ajax({
-    url: '/api/quotes/grouped',
-    success: function(groups) {
-      let html = '';
-      groups.forEach(function(group, idx) {
-        html += '<div class="group-container">';
-        html += '<h5 class="group-title">Group ' + (idx + 1) + ' (' + group.quotes.length + ' quotes)</h5>';
-        group.quotes.forEach(function(q) {
-          html += '<div class="quote-card">';
-          html += '<p class="quote-text">"' + esc(q.text) + '"</p>';
-          html += '<p class="quote-author">- <span class="author-link" data-author="' + esc(q.author) + '">' + esc(q.author) + '</span></p>';
-          html += '</div>';
-        });
-        html += '</div>';
-      });
-      $('#content').html(html);
-    },
-    error: function() {
-      $('#content').html('<p class="text-danger">error loading quotes</p>');
+  const quotes = QuoteStore.getQuotes();
+
+  if (quotes.length === 0) {
+    $('#content').html('<p class="text-muted">no quotes stored yet - visit the home or quotes page first to load some quotes</p>');
+    return;
+  }
+
+  const threshold = 3;
+  const groups = [];
+  const used = new Set();
+
+  quotes.forEach(function(q, i) {
+    if (used.has(i)) return;
+
+    const group = { quotes: [q] };
+    used.add(i);
+
+    quotes.forEach(function(q2, j) {
+      if (used.has(j) || i === j) return;
+      if (sharedWords(q.text, q2.text) >= threshold) {
+        group.quotes.push(q2);
+        used.add(j);
+      }
+    });
+
+    if (group.quotes.length > 1) {
+      groups.push(group);
     }
   });
+
+  let html = '';
+  html += '<p class="text-muted small">grouping ' + quotes.length + ' stored quotes (minimum ' + threshold + ' shared words)</p>';
+
+  groups.forEach(function(group, idx) {
+    html += '<div class="group-container">';
+    html += '<h5 class="group-title">Group ' + (idx + 1) + ' (' + group.quotes.length + ' quotes)</h5>';
+    group.quotes.forEach(function(q) {
+      html += '<div class="quote-card">';
+      html += '<p class="quote-text">"' + esc(q.text) + '"</p>';
+      html += '<p class="quote-author">- <span class="author-link" data-author="' + esc(q.author) + '">' + esc(q.author) + '</span></p>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+
+  if (groups.length === 0) {
+    html += '<p class="text-muted">no groups found - try loading more quotes first</p>';
+  }
+
+  $('#content').html(html);
 }
 
 // use event delegation because the cards are added dynamically
