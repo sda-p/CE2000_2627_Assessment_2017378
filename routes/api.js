@@ -106,7 +106,8 @@ router.get('/quotes/grouped', async (req, res) => {
 // wikimedia requires a descriptive user-agent so we set one here
 router.get('/wiki/summary/:author', async (req, res) => {
   try {
-    const author = req.params.author;
+    // replace spaces with underscores for the wikipedia url
+    const author = req.params.author.replace(/\s+/g, '_');
     const url = 'https://en.wikipedia.org/api/rest_v1/page/summary/' + author;
     
     const response = await fetch(url, {

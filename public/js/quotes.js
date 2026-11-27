@@ -38,7 +38,7 @@ function showAuthorModal(author) {
   modal.show();
   
   // fetch from our backend which proxies to wikipedia
-  fetch('/api/wiki/summary/' + author)
+  fetch('/api/wiki/summary/' + encodeURIComponent(author))
     .then(function(res) {
       if (res.status === 404) {
         modalBody.innerHTML = '<p class="text-muted">no wikipedia page found for ' + author + '</p>';
