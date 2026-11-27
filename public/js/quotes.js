@@ -3,6 +3,11 @@ let loaded = 0; // how many quotes we've shown so far
 let totalQuotes = null; // will be set from the api response
 let newCardTimers = []; // keep track of the arrow blink timers
 
+// escape html entities to prevent injection from api data
+function esc(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // create a little svg arrow to show which quotes are new
 function makeArrow() {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -52,7 +57,7 @@ function showAuthorModal(author) {
   fetch('/api/wiki/summary/' + encodeURIComponent(author))
     .then(function(res) {
       if (res.status === 404) {
-        modalBody.innerHTML = '<p class="text-muted">no wikipedia page found for ' + author + '</p>';
+        modalBody.innerHTML = '<p class="text-muted">no wikipedia page found for ' + esc(author) + '</p>';
         return null;
       }
       return res.json();
@@ -69,22 +74,22 @@ function showAuthorModal(author) {
       
       // show thumbnail if available
       if (data.thumbnail && data.thumbnail.source) {
-        html += '<img src="' + data.thumbnail.source + '" alt="' + data.title + '" class="mb-2" style="max-width: 200px;">';
+        html += '<img src="' + esc(data.thumbnail.source) + '" alt="' + esc(data.title) + '" class="mb-2" style="max-width: 200px;">';
       }
       
       // show description
       if (data.description) {
-        html += '<p class="fw-bold">' + data.description + '</p>';
+        html += '<p class="fw-bold">' + esc(data.description) + '</p>';
       }
       
       // show extract (summary)
       if (data.extract) {
-        html += '<p class="small">' + data.extract + '</p>';
+        html += '<p class="small">' + esc(data.extract) + '</p>';
       }
       
       // link to full article
       if (data.content_urls && data.content_urls.desktop) {
-        html += '<a href="' + data.content_urls.desktop.page + '" target="_blank" class="btn btn-sm btn-primary">read more on wikipedia</a>';
+        html += '<a href="' + esc(data.content_urls.desktop.page) + '" target="_blank" class="btn btn-sm btn-primary">read more on wikipedia</a>';
       }
       
       // set modal title
@@ -122,8 +127,8 @@ async function loadQuotes(append) {
       if (append) {
         html += '<span class="arrow-slot"></span>';
       }
-      html += '<p class="quote-text">"' + q.text + '"</p>';
-      html += '<p class="quote-author">- <span class="author-link" data-author="' + q.author + '">' + q.author + '</span></p>';
+      html += '<p class="quote-text">"' + esc(q.text) + '"</p>';
+      html += '<p class="quote-author">- <span class="author-link" data-author="' + esc(q.author) + '">' + esc(q.author) + '</span></p>';
       html += '</div>';
     });
 

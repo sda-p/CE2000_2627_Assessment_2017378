@@ -4,6 +4,11 @@ console.log('app loaded');
 // colors for the card borders - cycles through them
 const cardColors = ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#6f42c1', '#fd7e14'];
 
+// escape html entities to prevent injection from api data
+function esc(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // show author info in a modal
 function showAuthorModal(author) {
   $('#authorModalBody').html('<p class="text-muted">loading...</p>');
@@ -24,22 +29,22 @@ function showAuthorModal(author) {
       
       // show thumbnail if available
       if (data.thumbnail && data.thumbnail.source) {
-        html += '<img src="' + data.thumbnail.source + '" alt="' + data.title + '" class="mb-2" style="max-width: 200px;">';
+        html += '<img src="' + esc(data.thumbnail.source) + '" alt="' + esc(data.title) + '" class="mb-2" style="max-width: 200px;">';
       }
       
       // show description
       if (data.description) {
-        html += '<p class="fw-bold">' + data.description + '</p>';
+        html += '<p class="fw-bold">' + esc(data.description) + '</p>';
       }
       
       // show extract (summary)
       if (data.extract) {
-        html += '<p class="small">' + data.extract + '</p>';
+        html += '<p class="small">' + esc(data.extract) + '</p>';
       }
       
       // link to full article
       if (data.content_urls && data.content_urls.desktop) {
-        html += '<a href="' + data.content_urls.desktop.page + '" target="_blank" class="btn btn-sm btn-primary">read more on wikipedia</a>';
+        html += '<a href="' + esc(data.content_urls.desktop.page) + '" target="_blank" class="btn btn-sm btn-primary">read more on wikipedia</a>';
       }
       
       // set modal title
@@ -50,7 +55,7 @@ function showAuthorModal(author) {
     error: function(xhr) {
       // 404 means no wikipedia page, anything else is a real error
       if (xhr.status === 404) {
-        $('#authorModalBody').html('<p class="text-muted">no wikipedia page found for ' + author + '</p>');
+        $('#authorModalBody').html('<p class="text-muted">no wikipedia page found for ' + esc(author) + '</p>');
       } else {
         $('#authorModalBody').html('<p class="text-danger">error loading author info</p>');
       }
@@ -70,8 +75,8 @@ function loadQuotes() {
         // cycle through the colors
         const color = cardColors[i % cardColors.length];
         html += '<div class="quote-card" style="border-left-color: ' + color + '">';
-        html += '<p class="quote-text">"' + q.text + '"</p>';
-        html += '<p class="quote-author">- <span class="author-link" data-author="' + q.author + '">' + q.author + '</span></p>';
+        html += '<p class="quote-text">"' + esc(q.text) + '"</p>';
+        html += '<p class="quote-author">- <span class="author-link" data-author="' + esc(q.author) + '">' + esc(q.author) + '</span></p>';
         html += '</div>';
       });
       $('#content').html(html);
