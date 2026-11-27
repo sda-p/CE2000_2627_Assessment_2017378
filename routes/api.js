@@ -137,6 +137,12 @@ router.get('/wiki/summary/:author', async (req, res) => {
       return;
     }
     
+    if (!response.ok) {
+      const text = await response.text();
+      res.status(response.status).json({ error: 'wikipedia api error: ' + text.substring(0, 100) });
+      return;
+    }
+    
     const data = await response.json();
     res.json(data);
   } catch (err) {
