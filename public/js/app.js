@@ -47,8 +47,13 @@ function showAuthorModal(author) {
       
       $('#authorModalBody').html(html);
     },
-    error: function() {
-      $('#authorModalBody').html('<p class="text-danger">error loading author info</p>');
+    error: function(xhr) {
+      // 404 means no wikipedia page, anything else is a real error
+      if (xhr.status === 404) {
+        $('#authorModalBody').html('<p class="text-muted">no wikipedia page found for ' + author + '</p>');
+      } else {
+        $('#authorModalBody').html('<p class="text-danger">error loading author info</p>');
+      }
     }
   });
 }
