@@ -102,4 +102,30 @@ router.get('/quotes/grouped', async (req, res) => {
   res.json(groups);
 });
 
+// wikipedia author lookup - proxies the wikipedia rest api
+// wikimedia requires a descriptive user-agent so we set one here
+router.get('/wiki/summary/:author', async (req, res) => {
+  try {
+    const author = req.params.author;
+    const url = 'https://en.wikipedia.org/api/rest_v1/page/summary/' + author;
+    
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'quote-cluster-ce2000/1.0 (student project) https://localhost:9500'
+      }
+    });
+    
+    if (response.status === 404) {
+      res.status(404).json({ error: 'no wikipedia page found for ' + author });
+      return;
+    }
+    
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('wikipedia error:', err.message);
+    res.status(500).json({ error: 'failed to fetch wikipedia summary' });
+  }
+});
+
 module.exports = router;
