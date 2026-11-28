@@ -4,6 +4,6 @@
     "Start Server": "npm start"
   },
   "preview": {
-    "App Preview": "https://{{domain}}:9500/"
+    "App Preview": "https://{{domain9500}}/"
   }
 }
