@@ -33,10 +33,10 @@ The server runs on port 9500 (configured for Codio deployment).
 The application uses three external APIs:
 
 - **type.fit** (home page): Returns a small fixed set of quotes (approximately 5) with no pagination support. Returns the same quotes on every request.
-- **dummyjson** (quotes page): Used for paginated quote loading. The quotes endpoint returns 30 quotes total with standard pagination parameters.
+- **dummyjson** (quotes page): Used for paginated quote loading. The quotes endpoint returns ~1500 quotes total with standard pagination parameters.
 - **Wikipedia API** (author lookups): Used to fetch author biographies when a user clicks an author name. The app's Express server proxies requests to the Wikipedia API to avoid CORS issues.
 
-The original plan was to use the Quotable API (api.quotable.io), but this service appears to be down (connections hang indefinitely). The zenquotes.io API was also tested but has aggressive rate limiting (returns 429 after approximately 5 requests). A local 100-quote JSON bank was used during development but was eventually replaced by the dummyjson API for the quotes page.
+The original plan was to use the Quotable API (api.quotable.io), but this service appears to be down (connections hang indefinitely). The zenquotes.io API was also tested but has aggressive rate limiting (returns 429 after approximately 5 requests). A local 100-quote JSON bank was used during development but was eventually replaced as the main quote source by the dummyjson API for the quotes page.
 
 ## Design decisions
 
@@ -48,7 +48,7 @@ The original plan was to use the Quotable API (api.quotable.io), but this servic
 ## Known limitations
 
 - The type.fit API returns the same small set of quotes on each request
-- The dummyjson API has a fixed set of 30 quotes with no search or filtering capabilities
+- The dummyjson API has a fixed set of ~1500 quotes with no search or filtering capabilities
 - The grouping algorithm is simplistic (shared word count) and does not constitute true semantic similarity
 - Wikipedia lookups depend on the author name matching a Wikipedia article; some authors may not have pages or may be ambiguous
 - No user authentication or server-side state; the quote store relies on browser localStorage
